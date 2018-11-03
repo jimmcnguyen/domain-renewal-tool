@@ -24,7 +24,6 @@ def main():
         passwordElem.submit()
         # logged in
         time.sleep(1.0)
-
         # inputs the domain into the crm search bar
         searchBar = browser.find_element_by_css_selector('#customer-filters-form > div > div.keywordsearchbox > input')
         searchBar.send_keys(sheet.cell(row=i, column=2).value)
@@ -46,12 +45,14 @@ def main():
                 'body > section:nth-child(4) > div.menu-main.open > div > div.menu-main-columns > div:nth-child(4) > div.menu-main-column-list > a')
             beranked.click()
             time.sleep(1.5)
+            # logs into beranked
             berankedEmailElem = browser.find_element_by_id('admin_email')
             berankedEmailElem.send_keys('josephs@ad.iq')
             berankedPasswordElem = browser.find_element_by_id('admin_password')
             berankedPasswordElem.send_keys('$!2018JoeS!$')
             berankedPasswordElem.submit()
             time.sleep(1.0)
+            # navigates to the customer profile page
             berankedHamburger = browser.find_element_by_css_selector(
                 'body > section:nth-child(3) > div > div > div > div.top_line_left_block > div.menu-main-root > a')
             berankedHamburger.click()
@@ -59,9 +60,11 @@ def main():
             berankedCustomers = browser.find_element_by_css_selector(
                 'body > section:nth-child(4) > div.menu-main.open > div > div.menu-main-columns > div:nth-child(2) > div.menu-main-column-list > a:nth-child(1)')
             berankedCustomers.click()
+            # inputs domain into search bar
             berankedSearchbar = browser.find_element_by_css_selector(
                 '#customer-filters-form > div > div.keywordsearchbox > input')
             berankedSearchbar.send_keys(sheet.cell(row=i, column=2).value)
+            # clicks 'apply'
             berankedButton = browser.find_element_by_css_selector(
                 '#customer-filters-form > div > div.filtermasterwrapperbox > div > div.filter-btn_boxwrapper > div.applybtn_horizontalflex > button')
             berankedButton.click()
