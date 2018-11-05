@@ -3,15 +3,13 @@ import time
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import Chrome
 
-# opens the excel spreadsheet
-wb = openpyxl.load_workbook('Expiring Domains 2017.xlsx')
-# stores the november 2018 sheet to 'sheet'
-sheet = wb['November 2018']
+
+wb = openpyxl.load_workbook('domains.xlsx')
+sheet = wb['Sheet1']
 
 
-def main():
+def login():
     try:
-        # logs in the CRM via headless chrome
         opts = Options()
         opts.set_headless()
         assert opts.headless
@@ -24,14 +22,13 @@ def main():
         passwordElem.submit()
         # logged in
         time.sleep(1.0)
-        # inputs the domain into the crm search bar
+
         searchBar = browser.find_element_by_css_selector('#customer-filters-form > div > div.keywordsearchbox > input')
+        # searches the domain on crm
         searchBar.send_keys(sheet.cell(row=i, column=2).value)
-        # clicks the 'apply' button
         button = browser.find_element_by_css_selector('#customer-filters-form > div > div.filtermasterwrapperbox > div > div.filter-btn_boxwrapper > div.applybtn_horizontalflex > button')
         button.click()
         time.sleep(1.5)
-        # if nothing is found, search on beranked
         customerContent = browser.find_element_by_css_selector(
             '#customers-content > div.graph-masterwrapper > div.graph-headerbox > div > div')
         if customerContent.text == 'Customer Profiles (Not Found)':
@@ -45,59 +42,62 @@ def main():
                 'body > section:nth-child(4) > div.menu-main.open > div > div.menu-main-columns > div:nth-child(4) > div.menu-main-column-list > a')
             beranked.click()
             time.sleep(1.5)
-            # logs into beranked
-            berankedEmailElem = browser.find_element_by_id('admin_email')
-            berankedEmailElem.send_keys('josephs@ad.iq')
-            berankedPasswordElem = browser.find_element_by_id('admin_password')
-            berankedPasswordElem.send_keys('$!2018JoeS!$')
-            berankedPasswordElem.submit()
+            berankedemailElem = browser.find_element_by_id('admin_email')
+            berankedemailElem.send_keys('josephs@ad.iq')
+            berankedpasswordElem = browser.find_element_by_id('admin_password')
+            berankedpasswordElem.send_keys('$!2018JoeS!$')
+            berankedpasswordElem.submit()
             time.sleep(1.0)
-            # navigates to the customer profile page
-            berankedHamburger = browser.find_element_by_css_selector(
+            berankedhamburger = browser.find_element_by_css_selector(
                 'body > section:nth-child(3) > div > div > div > div.top_line_left_block > div.menu-main-root > a')
-            berankedHamburger.click()
+            berankedhamburger.click()
             time.sleep(1.0)
-            berankedCustomers = browser.find_element_by_css_selector(
+            berankedcustomers = browser.find_element_by_css_selector(
                 'body > section:nth-child(4) > div.menu-main.open > div > div.menu-main-columns > div:nth-child(2) > div.menu-main-column-list > a:nth-child(1)')
-            berankedCustomers.click()
-            # inputs domain into search bar
-            berankedSearchbar = browser.find_element_by_css_selector(
+            berankedcustomers.click()
+            berankedsearchbar = browser.find_element_by_css_selector(
                 '#customer-filters-form > div > div.keywordsearchbox > input')
-            berankedSearchbar.send_keys(sheet.cell(row=i, column=2).value)
-            # clicks 'apply'
-            berankedButton = browser.find_element_by_css_selector(
+            berankedsearchbar.send_keys(sheet.cell(row=i, column=2).value)
+            berankedbutton = browser.find_element_by_css_selector(
                 '#customer-filters-form > div > div.filtermasterwrapperbox > div > div.filter-btn_boxwrapper > div.applybtn_horizontalflex > button')
-            berankedButton.click()
+            berankedbutton.click()
             time.sleep(1.5)
-            berankedCustomerContent = browser.find_element_by_css_selector(
+            berankedcustomercontent = browser.find_element_by_css_selector(
                 '#customers-content > div.graph-masterwrapper > div.graph-headerbox > div > div')
-            if berankedCustomerContent.text == 'Customer Profiles (Not Found)':
+            if berankedcustomercontent.text == 'Customer Profiles (Not Found)':
                 print('Not found in BeRanked')
                 cell = sheet.cell(row=i, column=5)
                 cell.value = 'Not found in either Ad.IQ or BeRanked'
+
             else:
-                berankedCustomerStatus = browser.find_element_by_css_selector(
+                berankedcustomerstatus = browser.find_element_by_css_selector(
                     '#customer-results > div > div:nth-child(3) > div > div > span')
-                print(berankedCustomerStatus.text)
+                print(berankedcustomerstatus.text)
                 cell = sheet.cell(row=i, column=5)
-                cell.value = berankedCustomerStatus.text
-        # updates the spreadsheet
+                cell.value = berankedcustomerstatus.text
+
+
         else:
             customerStatus = browser.find_element_by_css_selector('#customer-results > div > div:nth-child(3) > div > div > span')
             print(customerStatus.text)
+            # should update on excel
             cell = sheet.cell(row=i, column=5)
             cell.value = customerStatus.text
+
     except:
         print('error')
-    # closes chrome
+
     browser.quit()
 
 
-# 2nd parameter needs to be +1 higher than the last row on the excel sheet; example 101 to get top 100
-# will do the first 10 iterations in this example
-for i in range(2, 11):
-    print(sheet.cell(row=i, column=2).value)
-    main()
-# saves and overwrites the excel file
-wb.save('Expiring Domains 2017.xlsx')
+# for loop to iterate through the column of the excel sheet
+try:
+    # 2nd parameter needs to be +1 higher than the last row on the excel sheet; example 101 to get top 100
+    # will do the first 5 iterations
+    for i in range(368, 380):
+        print(sheet.cell(row=i, column=2).value)
+        login()
+except:
+    print('Error')
+wb.save('domains.xlsx')
 print('Done')
