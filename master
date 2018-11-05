@@ -8,8 +8,9 @@ wb = openpyxl.load_workbook('domains.xlsx')
 sheet = wb['Sheet1']
 
 
-def login():
+def main():
     try:
+        # logs into CRM
         opts = Options()
         opts.set_headless()
         assert opts.headless
@@ -22,12 +23,12 @@ def login():
         passwordElem.submit()
         # logged in
         time.sleep(1.0)
-
-        searchBar = browser.find_element_by_css_selector('#customer-filters-form > div > div.keywordsearchbox > input')
         # searches the domain on crm
+        searchBar = browser.find_element_by_css_selector('#customer-filters-form > div > div.keywordsearchbox > input')
         searchBar.send_keys(sheet.cell(row=i, column=2).value)
         button = browser.find_element_by_css_selector('#customer-filters-form > div > div.filtermasterwrapperbox > div > div.filter-btn_boxwrapper > div.applybtn_horizontalflex > button')
         button.click()
+        # clicks 'Apply'
         time.sleep(1.5)
         customerContent = browser.find_element_by_css_selector(
             '#customers-content > div.graph-masterwrapper > div.graph-headerbox > div > div')
@@ -68,38 +69,28 @@ def login():
                 print('Not found in BeRanked')
                 cell = sheet.cell(row=i, column=5)
                 cell.value = 'Not found in either Ad.IQ or BeRanked'
-
             else:
                 berankedCustomerStatus = browser.find_element_by_css_selector(
                     '#customer-results > div > div:nth-child(3) > div > div > span')
                 print(berankedCustomerStatus.text)
                 cell = sheet.cell(row=i, column=5)
                 cell.value = berankedCustomerStatus.text
-
-
         else:
             customerStatus = browser.find_element_by_css_selector('#customer-results > div > div:nth-child(3) > div > div > span')
             print(customerStatus.text)
-            # should update on excel
+            # update on excel
             cell = sheet.cell(row=i, column=5)
             cell.value = customerStatus.text
-
     except:
         print('error')
-
     browser.quit()
 
 
-# for loop to iterate through the column of the excel sheet
-
-# 2nd parameter needs to be +1 higher than the last row on the excel sheet; example 101 to get top 100
-# will do the first 5 iterations
 start = time.time()
-for i in range(368, 389):
-    print(sheet.cell(row=i, column=2).value)
-    login()
-print('Error')
+for i in range(830, 831):
+    print(i, sheet.cell(row=i, column=2).value)
+    main()
 wb.save('domains.xlsx')
 end = time.time()
-print(end - start + ' seconds')
+print(end - start, 'seconds')
 print('Done')
